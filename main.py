@@ -1,11 +1,10 @@
 import mimetypes
-import json
 import socket
 import logging
 from pathlib import Path
 from urllib.parse import unquote_plus
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from threading import Thread
+from multiprocessing import Process
 from pymongo import MongoClient
 from datetime import datetime
 
@@ -115,6 +114,10 @@ def run_socket_server():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(threadName)s - %(message)s")
-    Thread(target=run_http_server, name="HTTP_Server").start()
-    Thread(target=run_socket_server, name="SOCKET_Server").start()
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(processName)s - %(message)s")
+    http_server_process = Process(target=run_http_server, name="HTTP_Server")
+    socket_server_process = Process(target=run_socket_server, name="SOCKET_Server")
+    http_server_process.start()
+    socket_server_process.start()
+    http_server_process.join()
+    socket_server_process.join()
